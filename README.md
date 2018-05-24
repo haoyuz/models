@@ -1,3 +1,21 @@
+# Distributed TensorFlow on Slurm Cluster
+
+Forked from https://github.com/tensorflow/models
+
+To pull changes from original repo:
+
+```
+# Add remote repo into local repo and name it as "models"
+git remote add models git@github.com:tensorflow/models.git
+
+# Pull remote changes into local repo
+git pull models master
+
+# push to remo
+git push
+```
+
+
 # TensorFlow Models
 
 This repository contains a number of different models implemented in [TensorFlow](https://www.tensorflow.org):
