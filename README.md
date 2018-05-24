@@ -11,7 +11,7 @@ git remote add models git@github.com:tensorflow/models.git
 # Pull remote changes into local repo
 git pull models master
 
-# push to remo
+# push the new commits to repo
 git push
 ```
 
