@@ -28,6 +28,7 @@ import os
 # pylint: disable=g-bad-import-order
 from absl import flags
 import tensorflow as tf
+from slurm.tensorflow_on_slurm import json_tf_config_from_slurm
 
 from official.resnet import resnet_model
 from official.utils.flags import core as flags_core
@@ -375,7 +376,8 @@ def resnet_main(
   session_config = tf.ConfigProto(
       inter_op_parallelism_threads=flags_obj.inter_op_parallelism_threads,
       intra_op_parallelism_threads=flags_obj.intra_op_parallelism_threads,
-      allow_soft_placement=True)
+      allow_soft_placement=True,
+      log_device_placement=True)
 
   if flags_core.get_num_gpus(flags_obj) == 0:
     distribution = tf.contrib.distribute.OneDeviceStrategy('device:CPU:0')
@@ -385,6 +387,12 @@ def resnet_main(
     distribution = tf.contrib.distribute.MirroredStrategy(
         num_gpus=flags_core.get_num_gpus(flags_obj)
     )
+
+  # TODO: make distributed training configurable from cmd argument
+  # Read Slurm cluster configuration using Slurm deployment script, and set
+  # environment variable TF_CONFIG to make Estimator run on cluster
+  json_tf_config = json_tf_config_from_slurm(ps_number=1)
+  os.environ['TF_CONFIG'] = json_tf_config
 
   run_config = tf.estimator.RunConfig(train_distribute=distribution,
                                       session_config=session_config)
