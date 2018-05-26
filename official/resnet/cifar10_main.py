@@ -244,10 +244,13 @@ def run_cifar(flags_obj):
   """
   input_function = (flags_obj.use_synthetic_data and get_synth_input_fn()
                     or input_fn)
-  resnet_run_loop.resnet_main(
+
+  # resnet_run_loop.resnet_main(
+  #     flags_obj, cifar10_model_fn, input_function, DATASET_NAME,
+  #     shape=[_HEIGHT, _WIDTH, _NUM_CHANNELS])
+  resnet_run_loop.resnet_train_and_evaluate(
       flags_obj, cifar10_model_fn, input_function, DATASET_NAME,
       shape=[_HEIGHT, _WIDTH, _NUM_CHANNELS])
-
 
 def main(_):
   with logger.benchmark_context(flags.FLAGS):

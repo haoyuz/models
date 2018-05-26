@@ -475,6 +475,108 @@ def resnet_main(
     classifier.export_savedmodel(flags_obj.export_dir, input_receiver_fn)
 
 
+def resnet_train_and_evaluate(
+  flags_obj, model_function, input_function, dataset_name, shape=None):
+  """
+  Train and evaluate Resnet model using `tf.estimator.train_and_evaluate` API,
+  in order to support distributed training on multiple hosts.
+
+  Args:
+    flags_obj: An object containing parsed flags. See define_resnet_flags()
+      for details.
+    model_function: the function that instantiates the Model and builds the
+      ops for train/eval. This will be passed directly into the estimator.
+    input_function: the function that processes the dataset and returns a
+      dataset that the estimator can train on. This will be wrapped with
+      all the relevant flags for running and passed to estimator.
+    dataset_name: the name of the dataset for training and evaluation. This is
+      used for logging purpose.
+    shape: list of ints representing the shape of the images used for training.
+      This is only used if flags_obj.export_dir is passed.
+  :return: None
+  """
+
+  # Using the Winograd non-fused algorithms provides a small performance boost.
+  os.environ['TF_ENABLE_WINOGRAD_NONFUSED'] = '1'
+
+  # Create session config based on values of inter_op_parallelism_threads and
+  # intra_op_parallelism_threads.
+  session_config = tf.ConfigProto(
+      inter_op_parallelism_threads=flags_obj.inter_op_parallelism_threads,
+      intra_op_parallelism_threads=flags_obj.intra_op_parallelism_threads,
+      allow_soft_placement=True,
+      log_device_placement=True)
+
+  # TODO: Device strategy does not support multi-host training.
+  # TODO: what is the correct variable strategy? Maybe use CPUs as ps and GPUs as workers?
+  # if flags_core.get_num_gpus(flags_obj) == 0:
+  #   distribution = tf.contrib.distribute.OneDeviceStrategy('device:CPU:0')
+  # elif flags_core.get_num_gpus(flags_obj) == 1:
+  #   distribution = tf.contrib.distribute.OneDeviceStrategy('device:GPU:0')
+  # else:
+  #   distribution = tf.contrib.distribute.MirroredStrategy(
+  #       num_gpus=flags_core.get_num_gpus(flags_obj)
+  #   )
+
+  # TODO: make distributed training configurable from cmd argument
+  # Read Slurm cluster configuration using Slurm deployment script, and set
+  # environment variable TF_CONFIG to make Estimator run on cluster
+  json_tf_config = json_tf_config_from_slurm(ps_number=1)
+  os.environ['TF_CONFIG'] = json_tf_config
+
+  run_config = tf.estimator.RunConfig(session_config=session_config,
+                                      save_summary_steps=100)
+
+  classifier = tf.estimator.Estimator(
+      model_fn=model_function, model_dir=flags_obj.model_dir, config=run_config,
+      params={
+          'resnet_size': int(flags_obj.resnet_size),
+          'data_format': flags_obj.data_format,
+          'batch_size': flags_obj.batch_size,
+          'resnet_version': int(flags_obj.resnet_version),
+          'loss_scale': flags_core.get_loss_scale(flags_obj),
+          'dtype': flags_core.get_tf_dtype(flags_obj)
+      })
+
+  run_params = {
+      'batch_size': flags_obj.batch_size,
+      'dtype': flags_core.get_tf_dtype(flags_obj),
+      'resnet_size': flags_obj.resnet_size,
+      'resnet_version': flags_obj.resnet_version,
+      'synthetic_data': flags_obj.use_synthetic_data,
+      'train_epochs': flags_obj.train_epochs,
+  }
+  benchmark_logger = logger.config_benchmark_logger(flags_obj)
+  benchmark_logger.log_run_info('resnet', dataset_name, run_params)
+
+  train_hooks = hooks_helper.get_train_hooks(
+      flags_obj.hooks,
+      batch_size=flags_obj.batch_size)
+
+  def input_fn_train():
+    return input_function(
+        is_training=True, data_dir=flags_obj.data_dir,
+        batch_size=per_device_batch_size(
+            flags_obj.batch_size, flags_core.get_num_gpus(flags_obj)),
+        num_epochs=flags_obj.epochs_between_evals)
+
+  def input_fn_eval():
+    return input_function(
+        is_training=False, data_dir=flags_obj.data_dir,
+        batch_size=per_device_batch_size(
+            flags_obj.batch_size, flags_core.get_num_gpus(flags_obj)),
+        num_epochs=1)
+
+
+  train_spec = tf.estimator.TrainSpec(input_fn=input_fn_train,
+                                      hooks=train_hooks,
+                                      max_steps=flags_obj.max_train_steps)
+
+  eval_spec = tf.estimator.EvalSpec(input_fn=input_fn_eval)
+
+  tf.estimator.train_and_evaluate(classifier, train_spec, eval_spec)
+
+
 def define_resnet_flags(resnet_size_choices=None):
   """Add flags and validators for ResNet."""
   flags_core.define_base()
