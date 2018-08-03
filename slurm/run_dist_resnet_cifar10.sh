@@ -15,8 +15,8 @@
 #SBATCH --mail-type=end
 #SBATCH --mail-user=haoyuz@princeton.edu
 
-SLURM_LOG_DIR=/home/haoyuz
-SCRIPT_PATH=/home/haoyuz/jobs/dist_resnet_cifar10.sh
+# Read path configurations
+source job.config
 
 srun --output=$SLURM_LOG_DIR/slurm-%x-%j-%n.out $SCRIPT_PATH
 

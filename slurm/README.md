@@ -3,6 +3,8 @@
 This directory contains both a Python module to deploy TensorFlow on Slurm (.py
 file) and some scripts to launch jobs on a Slurm cluster (.sh files).
 
+**Note**: must correctly configure paths on machines (`job.config` file).
+
 The status of Slurm batch files:
 
 * Scripts for preprocessing
