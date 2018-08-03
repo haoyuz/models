@@ -37,7 +37,7 @@ Below are the commands for running the Transformer model. See the [Detailed inst
 cd /path/to/models/official/transformer
 
 # Ensure that PYTHONPATH is correctly defined as described in
-# https://github.com/tensorflow/models/tree/master/official#running-the-models
+# https://github.com/tensorflow/models/tree/master/official#requirements
 # export PYTHONPATH="$PYTHONPATH:/path/to/models"
 
 # Export variables
@@ -94,7 +94,7 @@ big | 28.9
 0. ### Environment preparation
 
    #### Add models repo to PYTHONPATH
-   Follow the instructions described in the [Running the models](https://github.com/tensorflow/models/tree/master/official#running-the-models) section to add the models folder to the python path.
+   Follow the instructions described in the [Requirements](https://github.com/tensorflow/models/tree/master/official#requirements) section to add the models folder to the python path.
 
    #### Export variables (optional)
 
@@ -214,7 +214,7 @@ big | 28.9
    demonstration purposes only, but will be optimized in the coming weeks.
 
 ## Export trained model
-To export the model as a Tensorflow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model) format, use the argument `--export_dir` when running `transformer_main.py`. A folder will be created in the directory with the name as the timestamp (e.g. $EXPORT_DIR/1526427396).
+To export the model as a Tensorflow [SavedModel](https://www.tensorflow.org/guide/saved_model) format, use the argument `--export_dir` when running `transformer_main.py`. A folder will be created in the directory with the name as the timestamp (e.g. $EXPORT_DIR/1526427396).
 
 ```
 EXPORT_DIR=$HOME/transformer/saved_model

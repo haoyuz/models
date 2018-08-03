@@ -96,3 +96,5 @@ rsync*
 
 # Vim temp files
 .swp
+
+samples/outreach/blogs/segmentation_blogpost/carvana-image-masking-challenge/
