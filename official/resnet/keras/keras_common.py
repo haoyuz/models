@@ -310,7 +310,7 @@ def define_keras_flags():
       'Note that profiler has a non-trivial performance overhead, and the '
       'output file can be gigantic if profiling many steps.')
   flags.DEFINE_boolean(
-      name='data_delay_prefetch', default=False,
+      name='data_delay_prefetch', default=None,
       help='Add a small delay in tf.data prefetch to prioritize memory copy of '
       'other tensors over the data minibatch for the (T+1)th step. It should '
       'help improve performance using EagerIterator and function. The codepath '
@@ -420,7 +420,7 @@ def _monkey_patch_org_create_device_dataset():
       multi_device_iterator_ops.MultiDeviceIterator._create_device_dataset)  # pylint: disable=protected-access
   code_lines = org_create_device_dataset_code.split('\n')
   # Insert in reverse order to avoid line number shift by previous insertions
-  code_lines.insert(5, '      ds = ds.apply(sleep_ops.sleep(11000))')  # 11ms
+  code_lines.insert(5, '      ds = ds.apply(sleep_ops.sleep(%s))' % (FLAGS.data_delay_prefetch * 1000))
   code_lines.insert(2, '    from tensorflow.python.data.experimental.ops import sleep as sleep_ops')  # pylint: disable=line-too-long
   patched_code = '\n'.join(line[2:] for line in code_lines)
   cls_multi_device_iterator.body[0].body[2] = ast.parse(patched_code).body[0]
