@@ -571,7 +571,6 @@ class Resnet50KerasBenchmarkBase(keras_benchmark.KerasBenchmark):
     FLAGS.batch_size = 256 * 8  # 8 GPUs
     FLAGS.use_tensor_lr = True
     FLAGS.tf_gpu_thread_mode = 'gpu_private'
-    FLAGS.data_delay_prefetch = True
     self._run_and_report_benchmark()
 
   def benchmark_8_gpu_fp16_cloning_tweaked(self):
@@ -665,8 +664,7 @@ class Resnet50KerasBenchmarkBase(keras_benchmark.KerasBenchmark):
     FLAGS.model_dir = self._get_model_dir('benchmark_xla_8_gpu_fp16_tweaked')
     FLAGS.batch_size = 256 * 8  # 8 GPUs
     FLAGS.use_tensor_lr = True
-    # FLAGS.tf_gpu_thread_mode = 'gpu_private'
-    FLAGS.data_delay_prefetch = True
+    FLAGS.tf_gpu_thread_mode = 'gpu_private'
     self._run_and_report_benchmark()
 
   def benchmark_xla_8_gpu_fp16_cloning_tweaked(self):
@@ -726,7 +724,6 @@ class Resnet50KerasBenchmarkBase(keras_benchmark.KerasBenchmark):
     FLAGS.batch_size = 256 * 8  # 8 GPUs
     FLAGS.use_tensor_lr = True
     FLAGS.tf_gpu_thread_mode = 'gpu_private'
-    FLAGS.data_delay_prefetch = True
     FLAGS.train_steps = 310
     self._run_and_report_benchmark()
 
