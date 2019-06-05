@@ -214,7 +214,7 @@ class Resnet50KerasBenchmarkBase(keras_benchmark.KerasBenchmark):
     ]
 
     for i in range(1, 30, 2):
-      setattr(self, 'benchmark_xla_8_gpu_fp16_tweaked_%s' % i,
+      setattr(self, 'benchmark_xla_8_gpu_fp16_tweaked_delay_prefetch_%s' % i,
               self.define_tweaked_benchmark_delay_prefetch(i))
 
     super(Resnet50KerasBenchmarkBase, self).__init__(
