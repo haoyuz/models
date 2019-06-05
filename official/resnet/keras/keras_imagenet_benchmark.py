@@ -213,10 +213,11 @@ class Resnet50KerasBenchmarkBase(keras_benchmark.KerasBenchmark):
         lambda: imagenet_main.define_imagenet_flags(dynamic_loss_scale=True)
     ]
 
-    for i in range(1, 30, 2):
-      setattr(Resnet50KerasBenchmarkBase,
-              'benchmark_xla_8_gpu_fp16_tweaked_delay_prefetch_%s' % i,
-              self.define_tweaked_benchmark_delay_prefetch(i))
+    for data_thread_count in range(40, 60, 4):
+      for gpu_thread_mode in ['gpu_private', 'global']:
+        setattr(Resnet50KerasBenchmarkBase,
+                'benchmark_xla_8_gpu_fp16_tuning_%s_%s' % (gpu_thread_mode == 'gpu_private', data_thread_count),
+                self.define_tweaked_benchmark_tuning(gpu_thread_mode, data_thread_count))
 
     super(Resnet50KerasBenchmarkBase, self).__init__(
         output_dir=output_dir,
@@ -674,7 +675,7 @@ class Resnet50KerasBenchmarkBase(keras_benchmark.KerasBenchmark):
     FLAGS.datasets_num_private_threads = 48
     self._run_and_report_benchmark()
 
-  def define_tweaked_benchmark_delay_prefetch(self, delay_prefetch):
+  def define_tweaked_benchmark_tuning(self, gpu_thread_mode, data_thread_count):
     """Test Keras model with manual config tuning, XLA, 8 GPUs and fp16."""
 
     def new_func(self):
@@ -688,9 +689,8 @@ class Resnet50KerasBenchmarkBase(keras_benchmark.KerasBenchmark):
       FLAGS.model_dir = self._get_model_dir('benchmark_xla_8_gpu_fp16_tweaked')
       FLAGS.batch_size = 256 * 8  # 8 GPUs
       FLAGS.use_tensor_lr = True
-      FLAGS.tf_gpu_thread_mode = 'gpu_private'
-      FLAGS.datasets_num_private_threads = 48
-      FLAGS.data_delay_prefetch = delay_prefetch
+      FLAGS.tf_gpu_thread_mode = gpu_thread_mode
+      FLAGS.datasets_num_private_threads = data_thread_count
       self._run_and_report_benchmark()
     return new_func
 
