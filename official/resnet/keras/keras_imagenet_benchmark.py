@@ -1040,6 +1040,7 @@ class TrivialKerasBenchmarkReal(keras_benchmark.KerasBenchmark):
     def_flags['skip_eval'] = True
     def_flags['report_accuracy_metrics'] = False
     def_flags['use_tensor_lr'] = True
+    def_flags['use_trivial_model'] = True
     def_flags['dtype'] = 'fp16'
     def_flags['data_dir'] = os.path.join(root_data_dir, 'imagenet')
     def_flags['train_steps'] = 600
@@ -1069,7 +1070,7 @@ class TrivialKerasBenchmarkReal(keras_benchmark.KerasBenchmark):
     FLAGS.num_gpus = 8
     FLAGS.enable_eager = True
     FLAGS.model_dir = self._get_model_dir('benchmark_8_gpu_warmup')
-    FLAGS.batch_size = 256
+    FLAGS.batch_size = 256 * 8
     FLAGS.train_steps = 700
     self._run_and_report_benchmark()
 
