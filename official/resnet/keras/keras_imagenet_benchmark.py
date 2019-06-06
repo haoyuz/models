@@ -1119,20 +1119,7 @@ class TrivialKerasBenchmarkReal(keras_benchmark.KerasBenchmark):
     FLAGS.model_dir = self._get_model_dir('benchmark_8_gpu_tweaked')
     FLAGS.batch_size = 256 * 8
     FLAGS.tf_gpu_thread_mode = 'gpu_private'
-    self._run_and_report_benchmark()
-
-  def benchmark_8_gpu_slack(self):
-    """Test trivial Keras model (input pipeline) with tf.data's
-       experimental_slack and 8 GPUs.
-    """
-    self._setup()
-
-    FLAGS.num_gpus = 8
-    FLAGS.enable_eager = True
-    FLAGS.enable_xla = True
-    FLAGS.model_dir = self._get_model_dir('benchmark_8_gpu_slack')
-    FLAGS.batch_size = 256 * 8
-    FLAGS.tf_data_experimental_slack = True
+    FLAGS.datasets_num_private_threads = 48
     self._run_and_report_benchmark()
 
   def benchmark_graph_8_gpu(self):
@@ -1160,6 +1147,7 @@ class TrivialKerasBenchmarkReal(keras_benchmark.KerasBenchmark):
     FLAGS.model_dir = self._get_model_dir('benchmark_graph_8_gpu_tweaked')
     FLAGS.batch_size = 256 * 8
     FLAGS.tf_gpu_thread_mode = 'gpu_private'
+    FLAGS.datasets_num_private_threads = 48
     self._run_and_report_benchmark()
 
   def fill_report_object(self, stats):
