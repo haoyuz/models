@@ -1039,6 +1039,7 @@ class TrivialKerasBenchmarkReal(keras_benchmark.KerasBenchmark):
     def_flags = {}
     def_flags['skip_eval'] = True
     def_flags['report_accuracy_metrics'] = False
+    def_flags['use_tensor_lr'] = True
     def_flags['dtype'] = 'fp16'
     def_flags['data_dir'] = os.path.join(root_data_dir, 'imagenet')
     def_flags['train_steps'] = 600
@@ -1061,7 +1062,7 @@ class TrivialKerasBenchmarkReal(keras_benchmark.KerasBenchmark):
         total_batch_size=FLAGS.batch_size,
         log_steps=FLAGS.log_steps)
 
-  def benchmark_8_gpu_warmup(self):
+  def disabled_8_gpu_warmup(self):
     """Dummy test that runs over an epoch to warmup the machine."""
     self._setup()
 
